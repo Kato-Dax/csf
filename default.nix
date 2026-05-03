@@ -1,5 +1,5 @@
-with import <nixpkgs> {};
-stdenv.mkDerivation {
+{ pkgs ? import <nixpkgs> {} }:
+pkgs.stdenv.mkDerivation {
   name = "scf";
   src = ./.;
 
