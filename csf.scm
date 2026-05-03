@@ -142,7 +142,7 @@
         [(in-form-name? state)
          (let* ([function-name (list->string (reverse (in-form-name-ident state)))])
            (if
-             (member c (list #\newline #\space #\( #\[ #\" #\) #\] #\# #\;))
+             (member c (list #\newline #\space #\( #\[ #\" #\) #\] #\# #\; #\, #\`))
              (again (set (make-after-form-name function-name (in-form-name-depth state))) "")
              (next (set (make-in-form-name (in-form-name-depth state) (cons c (in-form-name-ident state)))) "")))]
         [(after-form-name? state) (on-after-form-name-state)]
