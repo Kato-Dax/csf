@@ -96,30 +96,28 @@
           [(char=? c #\;)
            (next (push (make-in-comment)) ";")]
           [else
-            (let ([prefx (if (or (>= 0 missing-depth) (not (line-info-all-whitespace line-info)))
-                           ""
-                           (list->string (map (lambda (_) #\space) (iota missing-depth))))])
+            (let* ([prefx (if (or (>= 0 missing-depth) (not (line-info-all-whitespace line-info)))
+                            ""
+                            (list->string (map (lambda (_) #\space) (iota missing-depth))))]
+                   [prefix-and-c (string-append prefx (list->string `(,c)))])
               (case c
                 [#\#
-                 (next (push (make-after-hash))
-                       (string-append prefx "#"))]
+                 (next (push (make-after-hash)) prefix-and-c)]
                 [#\"
-                 (next (cons (make-in-string) states)
-                       (string-append prefx "\""))]
+                 (next (cons (make-in-string) states) prefix-and-c)]
                 [else
-                  (let ([prefix-and-c (string-append prefx (list->string `(,c)))])
-                    (case c
-                      [#\(
-                       (next
-                         (push (make-in-form-name (+ (string-length prefx) (line-info-depth line-info)) '()))
-                         prefix-and-c)]
-                      [#\[
-                       (next
-                         (push (make-in-form-name (+ (string-length prefx) (line-info-depth line-info)) '()))
-                         prefix-and-c)]
-                      [#\) (next (pop) prefix-and-c)]
-                      [#\] (next (pop) prefix-and-c)]
-                      [else (next states prefix-and-c)]))]))])))
+                  (case c
+                    [#\(
+                     (next
+                       (push (make-in-form-name (+ (string-length prefx) (line-info-depth line-info)) '()))
+                       prefix-and-c)]
+                    [#\[
+                     (next
+                       (push (make-in-form-name (+ (string-length prefx) (line-info-depth line-info)) '()))
+                       prefix-and-c)]
+                    [#\) (next (pop) prefix-and-c)]
+                    [#\] (next (pop) prefix-and-c)]
+                    [else (next states prefix-and-c)])]))])))
 
     (define (on-after-form-name-state)
       (let ([form-name (after-form-name-form-name state)])
