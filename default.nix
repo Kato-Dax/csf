@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
 pkgs.stdenv.mkDerivation {
-  name = "scf";
+  name = "csf";
   src = ./.;
 
   nativeBuildInputs = [];
