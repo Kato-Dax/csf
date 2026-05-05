@@ -38,7 +38,7 @@
 (define-record-type (string-escape make-string-escape string-escape?) (fields))
 (define-record-type (in-comment make-in-comment in-comment?) (fields))
 
-(define special-forms '("define" "if" "let" "let*" "letrec" "case" "cond" "lambda" "set!" "unless" "when"))
+(define special-forms '("define" "if" "let" "let*" "letrec" "letrec*" "case" "cond" "lambda" "set!" "unless" "when"))
 
 (define-record-type (line-info make-line-info line-info?) (fields depth all-whitespace))
 
@@ -128,7 +128,10 @@
            (next (push (make-in-comment)) ";")]
           [(char=? c #\newline)
            (next
-             (set (make-in-indented (+ 2 (after-form-name-depth state))))
+             (set (make-in-indented
+                    (if (string->number form-name)
+                      (+ 1 (after-form-name-depth state))
+                      (+ 2 (after-form-name-depth state)))))
              (string-append form-name "\n"))]
           [else
             (let* ([gap (if (or (char=? c #\)) (char=? c #\]) (= 0 (string-length form-name))) "" " ")]
