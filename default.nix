@@ -6,11 +6,12 @@ pkgs.stdenv.mkDerivation {
   nativeBuildInputs = [];
   buildInputs = [];
 
+  buildPhase = ''
+    gcc -O3 ./csf.c -o csf
+  '';
   installPhase = ''
     mkdir -p $out/bin
-    cp ./csf.scm $out/bin/
-    echo "#!/usr/bin/env sh" > $out/bin/csf
-    echo "${pkgs.chez}/bin/scheme --program $out/bin/csf.scm \"\''${@:1}\"" >> $out/bin/csf
+    cp ./csf $out/bin/
     chmod +x $out/bin/csf
   '';
 }

@@ -1,12 +1,12 @@
 # Chez Scheme Formatter
 *csf* is a code formatter for scheme. <br>
-It's written in [chez scheme](https://cisco.github.io/ChezScheme/) and only tested against Chez Scheme code.
+It was originally written in [chez scheme](https://cisco.github.io/ChezScheme/) and is only tested against Chez Scheme code.
 
 ## Usage
 *csf* reads from stdin and outputs formatted code to stdout.
 
 ```bash
-./csf.scm < unformatted.scm > formatted.scm
+csf < unformatted.scm > formatted.scm
 ```
 
 I recommend letting your editor know how to use *csf*.
@@ -18,8 +18,13 @@ vim.opt.formatprg = "csf.scm" -- If you put csf.scm into your PATH
 ```
 
 ## Installation
-*csf* is implemented in a single file without any dependencies [`csf.scm`](./csf.scm).
-As long as you have Chez Scheme installed, it should just work.
+*csf* is implemented in a single C file without any dependencies besides libc [`./csf.c`](./csf.c).
+
+Compile it using `cc ./csf.c -o csf` and put the binary somewhere on your path, for example using: `mv ./csf ~/.local/bin/`.
+
+### Scheme version
+There is also a version of `csf` which is implemented in scheme also in single file without any dependencies [`csf.scm`](./csf.scm).
+As long as you have Chez Scheme installed, it should just work, although it is much slower than the C version.
 
 If the shebang in csf.scm doesn't work, you can call it directly:
 `scheme --program ./csf.scm`.
