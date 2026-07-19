@@ -1,3 +1,10 @@
+#if 0
+set -eu
+exe=$(mktemp)
+trap "rm $exe" EXIT
+cc -x c <(tail -n +7 $0) -o $exe && $exe "$@" ; exit
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
