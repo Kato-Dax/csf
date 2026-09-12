@@ -51,6 +51,7 @@ const char* const SPECIAL_FORMS[] = {
   "let",
   "let*",
   "letrec",
+  "and-let*",
   "case",
   "cond",
   "lambda",
