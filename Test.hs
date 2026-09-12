@@ -176,6 +176,19 @@ testcases =
         10
         12)
     """
+  , TestCase
+    """
+    (f ()
+       x)
+    (λ (x)
+      x)
+    """
+    """
+    (f ()
+       x)
+    (λ (x)
+      x)
+    """
   ]
 
 main = run =<< getArgs

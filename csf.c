@@ -46,6 +46,7 @@ struct state {
 };
 
 const char* const SPECIAL_FORMS[] = {
+  "λ",
   "define",
   "if",
   "let",
