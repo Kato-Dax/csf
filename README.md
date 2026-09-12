@@ -22,13 +22,6 @@ vim.opt.formatprg = "csf.scm" -- If you put csf.scm into your PATH
 
 Compile it using `cc ./csf.c -o csf` and put the binary somewhere on your path, for example using: `mv ./csf ~/.local/bin/`.
 
-### Scheme version
-There is also a version of `csf` which is implemented in scheme also in single file without any dependencies [`csf.scm`](./csf.scm).
-As long as you have Chez Scheme installed, it should just work, although it is much slower than the C version.
-
-If the shebang in csf.scm doesn't work, you can call it directly:
-`scheme --program ./csf.scm`.
-
 ## Behaviour
 *csf* is very simple, it doesn't change anything in your code besides indentation.
 

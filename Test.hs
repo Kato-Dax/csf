@@ -163,28 +163,42 @@ testcases =
     """
   , TestCase "(,(a))" "(,(a))"
   , TestCase "(`(a))" "(`(a))"
+  , TestCase
+    """
+    0
+      (if 5
+      10
+      12)
+    """
+    """
+    0
+      (if 5
+        10
+        12)
+    """
   ]
 
 main = run =<< getArgs
 
 run args = do
   let spawnFormatter = do
-        (Just stdin, Just stdout, _, procHandle) <- case args of
+        (Just stdin, Just stdout, Just stderr, procHandle) <- case args of
           [] -> do
             hPutStrLn stderr . printf "usage: %s <formatter-cmd> [formatter-args]" =<< getProgName
             exitFailure
           formatterCmd:formatterArgs -> do
-            createProcess (proc formatterCmd formatterArgs){ std_in = CreatePipe, std_out = CreatePipe }
-        pure (stdin, stdout, procHandle)
+            createProcess (proc formatterCmd formatterArgs){ std_in = CreatePipe, std_out = CreatePipe, std_err = CreatePipe }
+        pure (stdin, stdout, stderr, procHandle)
 
   void $ for testcases $ \(TestCase { input, expected }) -> do
-    (stdin, stdout, procHandle) <- spawnFormatter
+    (stdin, stdout, childStderr, procHandle) <- spawnFormatter
     hPutStr stdin input
     hClose stdin
 
     actual <- hGetContents stdout
     when (actual /= expected) do
-      hPutStrLn stderr $ printf "Input:\n%s\nExpected:\n%s\nActual:\n%s\n" input expected actual
+      childStderr <- hGetContents childStderr
+      hPutStrLn stderr $ printf "Input:\n%s\nExpected:\n%s\nActual:\n%s\nStderr:\n%s\n" input expected actual childStderr
       exitFailure
 
     waitForProcess procHandle >>= \case

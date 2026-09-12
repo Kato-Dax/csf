@@ -16,6 +16,7 @@ cc -x c <(tail -n +7 $0) -o $exe && $exe "$@" ; exit
 const size_t MAX_FORM_NAME_LEN = 32;
 
 struct line_info {
+  uint32_t printed_depth;
   uint32_t depth;
   bool all_whitespace;
 };
@@ -34,6 +35,7 @@ struct state {
   union {
     struct {
       uint32_t depth;
+      bool is_first;
     } in_indented;
     struct {
       uint32_t depth;
@@ -74,16 +76,22 @@ char next_char() {
   return c;
 }
 void put_char(struct line_info* line_info, char c) {
+  while (line_info->depth > line_info->printed_depth) {
+    line_info->printed_depth += 1;
+    fputc(' ', stdout);
+  }
   if (c == '\n') {
+    line_info->printed_depth = 0;
     line_info->depth = 0;
     line_info->all_whitespace = true;
   } else {
+    line_info->printed_depth += 1;
     line_info->depth += 1;
   }
   line_info->all_whitespace = line_info->all_whitespace && isspace(c);
   fputc(c, stdout);
 }
-void put_char_repeat(struct line_info* line_info, char c, uint32_t n) {\
+void put_char_repeat(struct line_info* line_info, char c, uint32_t n) {
   while (n-- > 0)
     put_char(line_info, c);
 }
@@ -93,10 +101,13 @@ void loop(struct state state, struct line_info* line_info) {
   while ((c = next_char())) {
   again:
     if (state.type == IN_INDENTED) {
-      uint32_t missing_depth = state.in_indented.depth < line_info->depth ? 0 : state.in_indented.depth - line_info->depth;
+      uint32_t missing_depth = state.in_indented.depth < line_info->printed_depth ? 0 : state.in_indented.depth - line_info->printed_depth;
       if (c == ' ') {
-        if (0 >= missing_depth && line_info->all_whitespace)
+        if (0 >= missing_depth && line_info->all_whitespace) {
+          if (state.in_indented.is_first)
+            line_info->depth += 1;
           continue;
+        }
         put_char(line_info, ' ');
         continue;
       }
@@ -162,15 +173,17 @@ void loop(struct state state, struct line_info* line_info) {
         put_char(line_info, c);
         state.type = IN_INDENTED;
         state.in_indented.depth = 2 + state.in_form_name.depth;
+        state.in_indented.is_first = false;
         continue;
       }
       bool gap = !(c == ')' || c == ']' || state.in_form_name.form_name_len == 0);
       uint32_t indentation = is_special_form(state.in_form_name.form_name, state.in_form_name.form_name_len)
           ? 2 + state.in_form_name.depth
-          : line_info->depth + (gap ? 1 : 0);
+          : line_info->printed_depth + (gap ? 1 : 0);
       if (gap) put_char(line_info, ' ');
       state.type = IN_INDENTED;
       state.in_indented.depth = indentation;
+      state.in_indented.is_first = false;
       goto again;
     }
     if (state.type == IN_COMMENT) {
@@ -210,10 +223,10 @@ void loop(struct state state, struct line_info* line_info) {
 }
 
 int main() {
-  struct line_info line_info = { 0, true };
+  struct line_info line_info = { 0, 0, true };
   struct state state = {
     .type = IN_INDENTED,
-    .in_indented = { .depth = 0 },
+    .in_indented = { .depth = 0, .is_first = true },
   };
 
   loop(state, &line_info);
